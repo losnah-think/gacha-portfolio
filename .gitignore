@@ -1,0 +1,30 @@
+# Local dependencies and build outputs
+node_modules/
+dist/
+.granite/
+.firebase/
+coverage/
+.cache/
+*.tsbuildinfo
+test-results/
+playwright-report/
+*.ait
+
+# Credentials and environment files
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*service-account*.json
+*serviceAccount*.json
+*adminsdk*.json
+
+# Local data and operational exports
+*.log
+*.csv
+*.sqlite*
+.DS_Store

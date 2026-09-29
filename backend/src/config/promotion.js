@@ -1,0 +1,137 @@
+
+/**
+ * 🎁 Toss Promotion Configuration
+ */
+export const PROMOTION_CONFIG = {
+    // 💸 포인트 환급(전환)용 프로모션 코드
+    // - 여기에 코드 설정 시 /api/v2/promotion/refund-config 에 반영됩니다.
+    // - null 또는 빈값이면 환급 요청의 promotionCode 입력이 비활성화됩니다.
+    REFUND_PROMOTION_CODE: process.env.TOSS_PROMO_REFUND_PROMOTION_CODE || 'PLACEHOLDER_REFUND_PROMOTION_CODE',
+
+    // 💸 환급 프로모션 코드 (1~8원 랜덤)
+    REFUND_TEST_CODE: process.env.TOSS_PROMO_REFUND_TEST_CODE || 'PLACEHOLDER_REFUND_TEST_CODE',
+    REFUND_LIVE_CODE: process.env.TOSS_PROMO_REFUND_LIVE_CODE || 'PLACEHOLDER_REFUND_LIVE_CODE',
+
+    // 📅 일일 미션: 페르소나 대화 (1~3원)
+    DAILY_CHAT_LUCY_CODE: process.env.TOSS_PROMO_DAILY_CHAT_LUCY_CODE || 'PLACEHOLDER_DAILY_CHAT_LUCY_CODE',
+    DAILY_CHAT_MONG_CODE: process.env.TOSS_PROMO_DAILY_CHAT_MONG_CODE || 'PLACEHOLDER_DAILY_CHAT_MONG_CODE',
+    DAILY_CHAT_ARCANA_CODE: process.env.TOSS_PROMO_DAILY_CHAT_ARCANA_CODE || 'PLACEHOLDER_DAILY_CHAT_ARCANA_CODE',
+    DAILY_CHAT_MONEYKING_CODE: process.env.TOSS_PROMO_DAILY_CHAT_MONEYKING_CODE || 'PLACEHOLDER_DAILY_CHAT_MONEYKING_CODE', // 재테크 멘토 머니킹
+    DAILY_CHAT_CHILDLOVE_CODE: process.env.TOSS_PROMO_DAILY_CHAT_CHILDLOVE_CODE || 'PLACEHOLDER_DAILY_CHAT_CHILDLOVE_CODE',
+    DAILY_CHAT_PASS_CODE: process.env.TOSS_PROMO_DAILY_CHAT_PASS_CODE || 'PLACEHOLDER_DAILY_CHAT_PASS_CODE',
+
+    // 📅 일일 미션: 카테고리 결과 확인 (1~3원)
+    DAILY_CHECK_FORTUNE_CODE: process.env.TOSS_PROMO_DAILY_CHECK_FORTUNE_CODE || 'PLACEHOLDER_DAILY_CHECK_FORTUNE_CODE', // 운세 가차
+    DAILY_CHECK_LOTTO_CODE: process.env.TOSS_PROMO_DAILY_CHECK_LOTTO_CODE || 'PLACEHOLDER_DAILY_CHECK_LOTTO_CODE',   // 로또 가차
+    DAILY_CHECK_ADVICE_CODE: process.env.TOSS_PROMO_DAILY_CHECK_ADVICE_CODE || 'PLACEHOLDER_DAILY_CHECK_ADVICE_CODE',  // 조언 가차
+    DAILY_CHECK_LOVE_CODE: process.env.TOSS_PROMO_DAILY_CHECK_LOVE_CODE || 'PLACEHOLDER_DAILY_CHECK_LOVE_CODE',    // 연애 가차
+
+    // 🎰 등급별 카드 뽑기 프로모션
+    GACHA_CARD_DIAMOND_CODE: process.env.TOSS_PROMO_GACHA_CARD_DIAMOND_CODE || 'PLACEHOLDER_GACHA_CARD_DIAMOND_CODE',
+    GACHA_CARD_PLATINUM_CODE: process.env.TOSS_PROMO_GACHA_CARD_PLATINUM_CODE || 'PLACEHOLDER_GACHA_CARD_PLATINUM_CODE',
+
+    // 📢 친구 공유 보상 프로모션 (삭제됨)
+
+
+    // 기본 지급 금액 (프로모션당 5원 지급)
+    DEFAULT_AMOUNT: 5,
+
+    // 🎉 첫 로그인 프로모션 (DNU 대상, 최대 1천원)
+    FIRST_LOGIN_CODE: process.env.TOSS_PROMO_FIRST_LOGIN_CODE || 'PLACEHOLDER_FIRST_LOGIN_CODE', // TODO: 토스 프로모션 코드로 교체
+
+    // 🎰 첫 가챠 프로모션 (DNU 대상, 최대 1천원)
+    FIRST_GACHA_CODE: process.env.TOSS_PROMO_FIRST_GACHA_CODE || 'PLACEHOLDER_FIRST_GACHA_CODE', // TODO: 토스 프로모션 코드로 교체
+
+    // 💬 첫 상담 프로모션 (DNU 대상, 최대 1천원)
+    FIRST_CHAT_CODE: process.env.TOSS_PROMO_FIRST_CHAT_CODE || 'PLACEHOLDER_FIRST_CHAT_CODE', // TODO: 토스 프로모션 코드로 교체
+
+    // 💸 첫 리워드 전환 프로모션 (DNU 대상, 최대 1천원)
+    FIRST_REFUND_CODE: process.env.TOSS_PROMO_FIRST_REFUND_CODE || 'PLACEHOLDER_FIRST_REFUND_CODE', // TODO: 토스 프로모션 코드로 교체
+
+    // 🎴 첫 레어 카드 획득 프로모션 (골드 이상 첫 획득, 최대 1천원)
+    FIRST_RARE_CARD_CODE: process.env.TOSS_PROMO_FIRST_RARE_CARD_CODE || 'PLACEHOLDER_FIRST_RARE_CARD_CODE', // TODO: 토스 프로모션 코드로 교체
+
+    // 🃏 카드 10개 모으기 프로모션 (1회성, 최대 1천원)
+    COLLECT_10_CARDS_CODE: process.env.TOSS_PROMO_COLLECT_10_CARDS_CODE || 'PLACEHOLDER_COLLECT_10_CARDS_CODE', // TODO: 토스 프로모션 코드로 교체
+
+    // 🎯 리워드 메뉴 가차 뽑기 달성 프로모션
+    REWARD_GACHA_10_CODE: process.env.TOSS_PROMO_REWARD_GACHA_10_CODE || 'PLACEHOLDER_REWARD_GACHA_10_CODE',
+    REWARD_GACHA_50_CODE: process.env.TOSS_PROMO_REWARD_GACHA_50_CODE || 'PLACEHOLDER_REWARD_GACHA_50_CODE',
+
+    // 🔮 운세 프로모션 (1~10원 99%, 100원 0.99%, 1000원 0.01%)
+    FORTUNE_VIEW_CODE: process.env.TOSS_PROMO_FORTUNE_VIEW_CODE || 'PLACEHOLDER_FORTUNE_VIEW_CODE',          // 운세 보기
+    FORTUNE_DETAIL_VIEW_CODE: process.env.TOSS_PROMO_FORTUNE_DETAIL_VIEW_CODE || 'PLACEHOLDER_FORTUNE_DETAIL_VIEW_CODE',   // 더 자세한 운세 보기
+};
+
+/**
+ * 🏷️ 프로모션 코드 → 한글 이름 매핑
+ * P&L, 통계 등에서 코드 대신 사람이 읽을 수 있는 이름 표시용
+ */
+export const PROMOTION_NAME_MAP = {
+    // 💸 포인트→현금 전환
+    [PROMOTION_CONFIG.REFUND_LIVE_CODE]: '포인트→현금 전환',
+    [PROMOTION_CONFIG.REFUND_TEST_CODE]: '(테스트) 포인트→현금 전환',
+
+    // 📅 일일 미션: 페르소나 대화
+    [PROMOTION_CONFIG.DAILY_CHAT_LUCY_CODE]: '루시와 상담하기',
+    [PROMOTION_CONFIG.DAILY_CHAT_MONG_CODE]: '몽과 상담하기',
+    [PROMOTION_CONFIG.DAILY_CHAT_ARCANA_CODE]: '아르카나와 상담하기',
+    [PROMOTION_CONFIG.DAILY_CHAT_MONEYKING_CODE]: '재테크킹과 상담하기',
+    [PROMOTION_CONFIG.DAILY_CHAT_CHILDLOVE_CODE]: '아이사랑과 상담하기',
+    [PROMOTION_CONFIG.DAILY_CHAT_PASS_CODE]: '합격의 신과 상담하기',
+
+    // 📅 일일 미션: 카테고리 결과 확인
+    [PROMOTION_CONFIG.DAILY_CHECK_FORTUNE_CODE]: '일일 미션: 운세 가차하기',
+    [PROMOTION_CONFIG.DAILY_CHECK_LOTTO_CODE]: '데일리: 로또 가차하기',
+    [PROMOTION_CONFIG.DAILY_CHECK_ADVICE_CODE]: '일일 미션: 조언 가차하기',
+    [PROMOTION_CONFIG.DAILY_CHECK_LOVE_CODE]: '일일 미션: 연애 가차하기',
+
+    // 🎰 등급별 카드 뽑기
+    [PROMOTION_CONFIG.GACHA_CARD_DIAMOND_CODE]: '다이아몬드 카드 뽑기',
+    [PROMOTION_CONFIG.GACHA_CARD_PLATINUM_CODE]: '플래티넘 카드 뽑기',
+
+    // 🎉 DNU 프로모션
+    [PROMOTION_CONFIG.FIRST_LOGIN_CODE]: '첫 로그인',
+    [PROMOTION_CONFIG.FIRST_GACHA_CODE]: '첫 가차',
+    [PROMOTION_CONFIG.FIRST_CHAT_CODE]: '첫 상담',
+    [PROMOTION_CONFIG.FIRST_REFUND_CODE]: '첫 리워드 전환',
+    [PROMOTION_CONFIG.FIRST_RARE_CARD_CODE]: '첫 레어카드',
+    [PROMOTION_CONFIG.COLLECT_10_CARDS_CODE]: '카드 10개 모으기',
+    [PROMOTION_CONFIG.REWARD_GACHA_10_CODE]: '리워드메뉴 가차뽑기 10번 달성',
+    [PROMOTION_CONFIG.REWARD_GACHA_50_CODE]: '리워드메뉴 가차뽑기 50번 달성',
+
+    // 🔮 운세 프로모션
+    [PROMOTION_CONFIG.FORTUNE_VIEW_CODE]: '운세 보기',
+    [PROMOTION_CONFIG.FORTUNE_DETAIL_VIEW_CODE]: '더 자세한 운세 보기',
+
+    // 테스트 코드 매핑
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHECK_FORTUNE_CODE}`]: '(테스트) 운세 가차',
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHECK_LOTTO_CODE}`]: '(테스트) 로또 가차',
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHECK_ADVICE_CODE}`]: '(테스트) 조언 가차',
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHECK_LOVE_CODE}`]: '(테스트) 연애 가차',
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHAT_MONEYKING_CODE}`]: '(테스트) 재테크킹 상담',
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHAT_LUCY_CODE}`]: '(테스트) 루시 상담',
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHAT_MONG_CODE}`]: '(테스트) 몽 상담',
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHAT_ARCANA_CODE}`]: '(테스트) 아르카나 상담',
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHAT_CHILDLOVE_CODE}`]: '(테스트) 아이사랑 상담',
+    [`TEST_${PROMOTION_CONFIG.DAILY_CHAT_PASS_CODE}`]: '(테스트) 합격의 신 상담',
+    [`TEST_${PROMOTION_CONFIG.FIRST_LOGIN_CODE}`]: '(테스트) 첫 로그인',
+    [`TEST_${PROMOTION_CONFIG.FIRST_GACHA_CODE}`]: '(테스트) 첫 가차',
+    [`TEST_${PROMOTION_CONFIG.FIRST_CHAT_CODE}`]: '(테스트) 첫 상담',
+    [`TEST_${PROMOTION_CONFIG.FIRST_REFUND_CODE}`]: '(테스트) 첫 리워드 전환',
+    [`TEST_${PROMOTION_CONFIG.FIRST_RARE_CARD_CODE}`]: '(테스트) 첫 레어카드',
+    [`TEST_${PROMOTION_CONFIG.COLLECT_10_CARDS_CODE}`]: '(테스트) 카드 10개 모으기',
+    [`TEST_${PROMOTION_CONFIG.REWARD_GACHA_10_CODE}`]: '(테스트) 리워드메뉴 가차뽑기 10번 달성',
+    [`TEST_${PROMOTION_CONFIG.REWARD_GACHA_50_CODE}`]: '(테스트) 리워드메뉴 가차뽑기 50번 달성',
+
+    // 기타 알려진 코드
+    'PLACEHOLDER_FIRST_LOGIN': '첫 로그인 (레거시)',
+    'PLACEHOLDER_FIRST_GACHA': '첫 가차 (레거시)',
+    'PLACEHOLDER_FIRST_RARE': '첫 레어카드 (레거시)',
+    'PLACEHOLDER_FIRST_CHAT': '첫 상담 (레거시)',
+    'PLACEHOLDER_COLLECT_10': '카드 10개 모으기 (레거시)',
+    'TEST_PLACEHOLDER_FIRST_GACHA': '(테스트) 첫 가차 (레거시)',
+    'TEST_PLACEHOLDER_FIRST_RARE': '(테스트) 첫 레어카드 (레거시)',
+    [`TEST_${PROMOTION_CONFIG.FORTUNE_VIEW_CODE}`]: '(테스트) 운세 보기',
+    [`TEST_${PROMOTION_CONFIG.FORTUNE_DETAIL_VIEW_CODE}`]: '(테스트) 더 자세한 운세 보기',
+};

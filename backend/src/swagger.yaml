@@ -1,0 +1,184 @@
+openapi: 3.0.0
+info:
+  title: Gacha Backend API
+  version: 1.0.0
+  description: API documentation for Gacha Backend
+servers:
+  - url: https://example.invalid
+    description: Production Server
+  - url: http://localhost:8787
+    description: Local Development Server
+
+paths:
+  /health:
+    get:
+      summary: Health Check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+
+  /api/personas:
+    get:
+      summary: Get List of Personas
+      description: Returns a list of personas sorted by priority (desc) and then CTA count (desc).
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        category:
+                          type: string
+                        priority:
+                          type: integer
+                        ctaCount:
+                          type: integer
+
+  /api/situations:
+    get:
+      summary: Get List of Situations
+      description: Returns a list of situations sorted by priority (desc) and then CTA count (desc).
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        category:
+                          type: string
+                        priority:
+                          type: integer
+                        ctaCount:
+                          type: integer
+
+  /api/interactions/cta:
+    post:
+      summary: Increment CTA Count
+      description: Increment the CTA count for a specific persona or situation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - id
+              properties:
+                type:
+                  type: string
+                  enum: [persona, situation]
+                id:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+
+  /api/gacha/pull:
+    post:
+      summary: Pull Gacha
+      description: Pull a random gacha item or generate one on demand.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                personaId:
+                  type: string
+                situation:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultType:
+                    type: string
+                    example: SUCCESS
+                  data:
+                    type: object
+
+  /api/situations/request:
+    post:
+      summary: Request New Situation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userKey
+                - name
+              properties:
+                userKey:
+                  type: string
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Request successful
+  
+  /api/user/tickets/status:
+    get:
+      summary: Get User Ticket Status
+      parameters:
+        - in: query
+          name: userKey
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
