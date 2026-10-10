@@ -68,6 +68,13 @@ gitleaks dir . --redact
 gitleaks git --log-opts="--all" --redact
 ```
 
+## Browser app verification — 2026-10-10
+
+- 43 unit tests, strict TypeScript, production build, changed TypeScript lint, server syntax and Git diff checks passed.
+- Anonymous public access, real Vertex advice, reading-size adjustment, Save, reload and reopening were verified. A 390px mobile viewport also generated and saved an actual café-character answer. One generation failed and succeeded on retry; no sample fallback was shown.
+- Public API checks returned 200 for actual generation, 405 for GET, 403 for a different Origin and 400 for an invalid character. Gitleaks found no secrets in the published source or Git history.
+- Original Toss authentication, rewards, payments and customer database integrations were not restored. The full dependency tree still reports 104 npm audit findings, including 5 critical; this change did not perform a dependency-wide security upgrade.
+
 ## Verification — 2026-09-29
 
 - Frontend, Node.js 24: dependency installation, 23 unit tests, strict TypeScript checks, the disconnected-page build, and an opt-in build of the full application source passed.
