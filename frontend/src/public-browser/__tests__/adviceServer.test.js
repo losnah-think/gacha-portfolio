@@ -93,6 +93,7 @@ describe('Vertex generation', () => {
     const [url, options] = vi.mocked(fetch).mock.calls[1];
     expect(url).toContain('/locations/global/publishers/google/models/gemini-3.5-flash-lite:generateContent');
     const body = JSON.parse(options.body);
+    expect(body.systemInstruction.parts[0].text).toContain('한국어 100~180자, 공백 포함 반드시 250자 이내, 본문만 출력하세요.');
     expect(body.generationConfig).toEqual({ maxOutputTokens: 768, thinkingConfig: { thinkingLevel: 'MINIMAL' } });
     expect(body.contents[0].parts[0].text).toBe(request().body.situation);
     expect(JSON.stringify(body)).not.toContain(testAccount.client_email);
@@ -103,6 +104,7 @@ describe('Vertex generation', () => {
 
   it('does not return blocked, truncated, oversized, empty or non-Korean provider output', async () => {
     const advice = await handler();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     for (const output of [
       { candidates: [{ finishReason: 'SAFETY' }] },
       { candidates: [{ finishReason: 'MAX_TOKENS', content: { parts: [{ text: '미완성 조언' }] } }] },
@@ -116,6 +118,10 @@ describe('Vertex generation', () => {
       expect(res.statusCode).toBe(502);
       expect(res.body.content).toBeUndefined();
     }
+    expect(warn.mock.calls).toEqual([
+      [{ kind: 'invalid-generated-text', length: 12, hasKorean: false }],
+      [{ kind: 'invalid-generated-text', length: 251, hasKorean: true }],
+    ]);
   });
 
   it('returns safe errors for provider failure, quota and timeout without a fixture fallback', async () => {

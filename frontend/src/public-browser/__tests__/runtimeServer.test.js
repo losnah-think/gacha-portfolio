@@ -142,6 +142,7 @@ describe('original quote and chat contracts', () => {
     const reply = response(); await run(request('/api/v3/chat/message', { chatId: start.body.chatId, personaId: 'cat', message: '이어서 무엇을 해볼까요?', history }), reply);
     expect(reply.body.message).toBe(text);
     const body = JSON.parse(vi.mocked(fetch).mock.calls.at(-1)[1].body);
+    expect(body.systemInstruction.parts[0].text).toContain('한국어 100~180자, 공백 포함 반드시 250자 이내, 본문만 출력하세요.');
     expect(body.contents.map(item => item.role)).toEqual(['user', 'model', 'user']);
     expect(body.contents.at(-1).parts[0].text).toBe('이어서 무엇을 해볼까요?');
   });
