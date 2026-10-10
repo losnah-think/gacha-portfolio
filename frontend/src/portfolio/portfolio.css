@@ -1,0 +1,44 @@
+#root.portfolio-root {
+  background: #f8faf7;
+  overflow-x: visible;
+}
+
+.portfolio-demo {
+  --color-toss-blue: #1d5fc3;
+  --color-toss-gray-500: #4e5968;
+  --color-toss-gray-600: #4e5968;
+  overflow-wrap: anywhere;
+}
+
+.portfolio-demo .demo-notice {
+  border: 1px solid #6b7684;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.portfolio-demo .demo-field {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #6b7684;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #191f28;
+  padding: 12px;
+  font: inherit;
+  resize: vertical;
+}
+
+.portfolio-demo .demo-field::placeholder {
+  color: #4e5968;
+}
+
+.portfolio-demo :is(button, input, textarea, select, a):focus-visible {
+  outline: 3px solid #191f28;
+  outline-offset: 4px;
+}
+
+.portfolio-demo button {
+  overflow-wrap: anywhere;
+}

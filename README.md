@@ -1,8 +1,28 @@
-# Gacha — product and engineering portfolio
+# Gacha: product and engineering portfolio
 
 Gacha is a Korean daily-content and rewards miniapp built for **Apps in Toss**. This repository contains a sanitized snapshot of the React frontend and Node.js backend, showing how product flows connect to implementation: onboarding, AI-generated content, saved results, reward balances, attendance, and partner integrations.
 
-I planned, built, and operated the product. The code here comes from that service; this repository is intended for reviewing the implementation and building an isolated development environment.
+I planned, built, and operated the product. The code here comes from that service; this repository includes a working browser portfolio demo and a sanitized source snapshot.
+
+## Use the browser app
+
+[Open Gacha](https://gacha-portfolio-alpha.vercel.app/).
+
+The standalone browser app lets you enter a concern, choose a character, request a new AI advice card, adjust its reading size, and save/reopen/delete it in this browser's collection. It sends a same-origin request to a new server function that calls Google Cloud Vertex AI. Successful answers come from that provider; failed or unconfigured requests show an error rather than a fixed sample fallback. This browser app does not connect to Toss login, real rewards, Firebase, payments, analytics or the former production backend.
+
+```sh
+cd frontend
+npm ci --ignore-scripts
+npm run dev
+```
+
+Use Node.js 24 or newer. `npm run dev` runs the frontend UI only; use Vercel development or a matching local server for `/api/advice`. Build with `npm run build`; deploy from the `frontend` project directory so Vercel includes both `api/advice.js` and `dist`. The server requires `VERTEX_PROJECT_ID`, `VERTEX_LOCATION=global`, `VERTEX_MODEL=gemini-3.5-flash-lite` and `VERTEX_SERVICE_ACCOUNT_JSON`. Keep all provider credentials on the server and keep `VITE_ENABLE_RUNTIME` unset.
+
+The adapter in [src/portfolio](frontend/src/portfolio) reuses the original `Button`, `Card`, `HistoryContentCard`, character/situation data, result-history shape and reading-size limits. The new [Vertex server function](frontend/api/advice.js) and browser adapter were added for portfolio review on 2026-10-10, rather than representing the original production backend. The collection stores up to 10 AI results in local storage only after Save. It never silently removes earlier saved answers. Earlier fixed-sample demo data uses a separate key and is not displayed as generated advice. See the [frontend setup and limits](frontend/README.md).
+
+## Contribution scope
+
+The product was developed and operated under my lead with AI coding tools. It also received one later frontend contribution from another developer, `rnhappysmile`, on 2026-05-20: an AI quick-ask visibility flag and an Apps in Toss SDK/package-lock update. I do not claim exclusive authorship of every commit. This public repository is a sanitized snapshot; the original repositories and their historical author records are private. Git author fields and this snapshot support a contribution review, rather than proving identity or exclusive authorship.
 
 ## Start here
 
@@ -30,7 +50,7 @@ flowchart LR
 - Excludes credentials, customer records, payment and analytics exports, internal operational documents, deployment automation, scheduled jobs, and previous Git history.
 - Excludes production artwork and other assets whose redistribution was not established. Some visual assets are therefore unavailable in this copy.
 
-This is a **source-review snapshot**, not a ready-to-deploy production template. Login, storage, AI generation, payments, rewards, and partner integrations require your own development services and authorization. Production data and credentials are never needed to review this repository.
+The original integrated application remains a **source-review snapshot**, not a ready-to-deploy production template. Its login, server storage, AI generation, payments, rewards, and partner integrations require your own development services and authorization. The new browser app requires its own authorized Vertex configuration; original production customer data is never needed for it or for code review.
 
 ## Local checks
 

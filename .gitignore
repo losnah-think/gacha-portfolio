@@ -5,6 +5,7 @@ dist/
 .firebase/
 coverage/
 .cache/
+.vercel/
 *.tsbuildinfo
 test-results/
 playwright-report/
