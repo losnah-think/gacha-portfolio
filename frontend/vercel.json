@@ -2,5 +2,16 @@
   "framework": "vite",
   "installCommand": "npm ci --ignore-scripts",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/v2/:path*", "destination": "/api/runtime?path=/api/v2/:path*" },
+    { "source": "/api/v3/:path*", "destination": "/api/runtime?path=/api/v3/:path*" },
+    { "source": "/api/log", "destination": "/api/runtime?path=/api/log" },
+    { "source": "/family", "destination": "/index.html" },
+    { "source": "/quote", "destination": "/index.html" },
+    { "source": "/ask", "destination": "/index.html" },
+    { "source": "/history", "destination": "/index.html" },
+    { "source": "/ranking", "destination": "/index.html" },
+    { "source": "/settings", "destination": "/index.html" }
+  ]
 }

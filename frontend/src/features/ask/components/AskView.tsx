@@ -8,6 +8,7 @@ import { getPersonaIcon } from '../../../shared/utils/personaHelper';
 import { formatRelativeTime } from '../../../shared/utils/formatRelativeTime';
 import { Card, EmptyState, Skeleton } from '../../../shared/components/ui';
 import { cn } from '../../../shared/utils/cn';
+import { IS_PUBLIC_BROWSER } from '../../../public-browser/config';
 
 interface AskViewProps {
   personas: Persona[];
@@ -165,7 +166,7 @@ export const AskView = ({
 
   const handleSubmit = () => {
     if (!query.trim() || !selectedPersona) return;
-    if (drawCount <= 0) return;
+    if (!IS_PUBLIC_BROWSER && drawCount <= 0) return;
     onStartChat(selectedPersona, query);
     setQuery('');
   };
@@ -199,7 +200,7 @@ export const AskView = ({
           </div>
           <div className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-toss-gray-100 bg-paper px-3 shadow-soft">
             <Sparkles size={14} className="text-toss-blue" />
-            <span className="t-caption font-bold text-toss-gray-500 tabular-nums">{drawCount}장</span>
+            <span className="t-caption font-bold text-toss-gray-500 tabular-nums">{IS_PUBLIC_BROWSER ? '웹 체험' : `${drawCount}장`}</span>
           </div>
         </div>
       </header>
@@ -409,14 +410,14 @@ export const AskView = ({
                       handleSubmit();
                     }
                   }}
-                  disabled={drawCount <= 0}
+                  disabled={!IS_PUBLIC_BROWSER && drawCount <= 0}
                 />
                 <div className="absolute bottom-3 right-3 flex items-center gap-2">
                   <span className="t-micro text-toss-gray-300">{query.length}/300</span>
                   <button
                     type="button"
                     onClick={handleSubmit}
-                    disabled={!query.trim() || drawCount <= 0}
+                    disabled={!query.trim() || (!IS_PUBLIC_BROWSER && drawCount <= 0)}
                     className="flex h-11 w-11 items-center justify-center rounded-full bg-toss-blue text-white transition-colors active:scale-95 disabled:bg-toss-gray-200 disabled:text-toss-gray-400"
                     aria-label="상담 시작하기"
                   >
@@ -426,7 +427,7 @@ export const AskView = ({
               </div>
 
               <p className="t-caption mt-3 text-center text-toss-gray-400">
-                {drawCount > 0
+                {IS_PUBLIC_BROWSER ? '무료 웹 체험으로 대화를 시작할 수 있어요' : drawCount > 0
                   ? `보내기를 누르면 ${selectedPersona.name}와의 대화가 시작돼요`
                   : '상담을 시작하려면 이용권이 필요해요'}
               </p>

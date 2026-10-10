@@ -7,6 +7,7 @@ import { appLogin } from '@apps-in-toss/web-framework';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { apiUrl } from './shared/api/client';
+import { IS_PUBLIC_BROWSER } from './public-browser/config';
 
 
 interface TossUserInfo {
@@ -69,6 +70,7 @@ export const getTossAuthCode = async (): Promise<{
   authorizationCode: string;
   referrer: 'DEFAULT' | 'SANDBOX';
 } | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   try {
     if (typeof appLogin === 'function') {
       const result = await appLogin();
@@ -94,6 +96,7 @@ export const getAccessToken = async (
   authorizationCode: string,
   referrer: 'DEFAULT' | 'SANDBOX'
 ): Promise<AccessTokenResponse | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   try {
     const response = await fetch(apiUrl('/toss/token'), {
       method: 'POST',
@@ -132,6 +135,7 @@ export const getAccessToken = async (
 export const getTossUserInfo = async (
   accessToken: string
 ): Promise<TossUserInfo | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   try {
     const response = await fetch(apiUrl('/toss/userinfo'), {
       method: 'GET',
@@ -171,6 +175,7 @@ export const getTossUserInfo = async (
 export const decryptTossDataWebCrypto = async (
   encryptedData: string
 ): Promise<string | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   try {
     if (!encryptedData) {
       return null;
@@ -227,6 +232,7 @@ export const verifyTossCallbackSignature = async (
  * 전체 OAuth 프로세스 자동화
  */
 export const performTossLogin = async (): Promise<TossUserInfo | null> => {
+  if (IS_PUBLIC_BROWSER) throw new Error('토스 로그인은 토스 앱에서만 사용할 수 있어요.');
   try {
     // 1. 인가 코드 받기
     const authResult = await getTossAuthCode();
@@ -293,6 +299,7 @@ export const performTossLogin = async (): Promise<TossUserInfo | null> => {
 
     // 5. Firestore에 유저 정보 저장 (복호화된 데이터 포함)
     try {
+      if (!db) throw new Error('Firebase is not configured');
       const userRef = doc(db, 'users', String(userInfo.userKey));
       await setDoc(userRef, {
         ...userInfo,
@@ -353,6 +360,7 @@ export const performTossLogin = async (): Promise<TossUserInfo | null> => {
 export const refreshAccessToken = async (
   refreshToken: string
 ): Promise<AccessTokenResponse | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   try {
     const response = await fetch(
       apiUrl('/toss/refresh'),
@@ -390,6 +398,7 @@ export const refreshAccessToken = async (
  * 6단계: 연결 끊기 (선택)
  */
 export const disconnectTossLogin = async (accessToken?: string): Promise<boolean> => {
+  if (IS_PUBLIC_BROWSER) return false;
   try {
     let token = accessToken;
     if (!token) {
@@ -435,6 +444,7 @@ export const disconnectTossLogin = async (accessToken?: string): Promise<boolean
  * 저장된 세션 정보 삭제 (Logout)
  */
 export const clearTossSession = async () => {
+  if (IS_PUBLIC_BROWSER) return;
   if (typeof window === 'undefined') return;
   window.localStorage.removeItem('toss_access_token');
   window.localStorage.removeItem('toss_refresh_token');
@@ -450,6 +460,7 @@ export const clearTossSession = async () => {
  * 저장된 Toss 사용자 정보 조회
  */
 export const getTossSavedUserKey = async (): Promise<string | number | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   if (typeof window === 'undefined') return null;
   const userKey = window.localStorage.getItem('toss_user_key');
   if (!userKey) return null;
@@ -462,6 +473,7 @@ export const getTossSavedUserKey = async (): Promise<string | number | null> => 
  * 저장된 Toss 사용자 이름 조회
  */
 export const getTossSavedUserName = async (): Promise<string | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   if (typeof window === 'undefined') return null;
   return window.localStorage.getItem('toss_user_name');
 };
@@ -470,6 +482,7 @@ export const getTossSavedUserName = async (): Promise<string | null> => {
  * 저장된 Toss 사용자 생일 조회
  */
 export const getTossSavedUserBirthday = async (): Promise<string | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   if (typeof window === 'undefined') return null;
   return window.localStorage.getItem('toss_user_birthday');
 };
@@ -478,6 +491,7 @@ export const getTossSavedUserBirthday = async (): Promise<string | null> => {
  * 저장된 Toss AccessToken 조회
  */
 export const getTossSavedAccessToken = async (): Promise<string | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   if (typeof window === 'undefined') return null;
   return window.localStorage.getItem('toss_access_token');
 };
@@ -486,6 +500,7 @@ export const getTossSavedAccessToken = async (): Promise<string | null> => {
  * 저장된 Toss 사용자 성별 조회
  */
 export const getTossSavedUserGender = async (): Promise<string | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   if (typeof window === 'undefined') return null;
   return window.localStorage.getItem('toss_user_gender');
 };
@@ -494,6 +509,7 @@ export const getTossSavedUserGender = async (): Promise<string | null> => {
  * 저장된 Toss 사용자 연령대 조회 (생년월일 기반)
  */
 export const getTossSavedUserAgeGroup = async (): Promise<number | null> => {
+  if (IS_PUBLIC_BROWSER) return null;
   if (typeof window === 'undefined') return null;
   const birthday = window.localStorage.getItem('toss_user_birthday');
   if (!birthday || birthday.length < 4) return null;
@@ -512,6 +528,7 @@ export const getTossSavedUserAgeGroup = async (): Promise<number | null> => {
  * Toss 로그인 상태 확인
  */
 export const isTossLoggedIn = async (): Promise<boolean> => {
+  if (IS_PUBLIC_BROWSER) return false;
   if (typeof window === 'undefined') return false;
   return !!window.localStorage.getItem('toss_access_token');
 };
@@ -523,6 +540,7 @@ export const isTossLoggedIn = async (): Promise<boolean> => {
  * @returns 갱신 성공 여부
  */
 export const ensureFreshToken = async (): Promise<boolean> => {
+  if (IS_PUBLIC_BROWSER) return false;
   if (typeof window === 'undefined') return false;
 
   const refreshToken = window.localStorage.getItem('toss_refresh_token');

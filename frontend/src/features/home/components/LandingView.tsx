@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { IS_PUBLIC_BROWSER } from '../../../public-browser/config';
 import { useState, useEffect } from 'react';
 import { useAppNavigationBar } from '../../../hooks/useAppNavigationBar';
 import {
@@ -267,7 +268,7 @@ export const LandingView = ({
             </div>
             <TicketCostButton
               className="mt-4"
-              cost={1}
+              cost={IS_PUBLIC_BROWSER ? 0 : 1}
               balance={drawCount}
               onConfirm={onGoFortune}
               onRecharge={onOpenTicketSheet}

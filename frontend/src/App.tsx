@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { getStorageUrl } from './shared/utils/storage';
+import { IS_PUBLIC_BROWSER } from './public-browser/config';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { performTossLogin, isTossLoggedIn, getTossSavedUserKey, getTossSavedUserName, getTossSavedUserBirthday, getTossSavedUserGender, getTossSavedUserAgeGroup, getZodiacSign, clearTossSession, disconnectTossLogin, ensureFreshToken } from './toss-auth';
 import { share, IAP, getTossShareLink, closeView, graniteEvent, contactsViral } from '@apps-in-toss/web-framework';
@@ -63,6 +64,7 @@ const FORTUNE_OPTION_NAMES = {
 } as const;
 
 type FortuneOptionId = keyof typeof FORTUNE_OPTION_NAMES;
+const HISTORY_STORAGE_KEY = IS_PUBLIC_BROWSER ? 'gacha_public_original_history_v1' : 'gacha_history';
 
 const toFortuneOption = (id: string = 'total') => {
   const safeId = Object.prototype.hasOwnProperty.call(FORTUNE_OPTION_NAMES, id)
@@ -120,7 +122,7 @@ function App() {
   // [Performance] 이미지 프리로딩
 
   // Safe environment variable access
-  const env = useMemo(() => ({ DEV: import.meta.env.DEV }), []);
+  const env = useMemo(() => ({ DEV: import.meta.env.DEV && !IS_PUBLIC_BROWSER }), []);
   const APP_URL = import.meta.env.VITE_APP_URL || 'https://example.invalid';
 
   const [result, setResult] = useState<GachaResult | null>(() => {
@@ -416,7 +418,7 @@ function App() {
   const [resultHistory, setResultHistory] = useState<ResultHistoryItem[]>(() => {
     if (typeof localStorage === 'undefined') return [];
     try {
-      const saved = localStorage.getItem('gacha_history');
+      const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
       const parsed = saved ? JSON.parse(saved) : [];
       if (!Array.isArray(parsed)) return [];
 
@@ -679,6 +681,7 @@ function App() {
   });
 
   const isLoggedIn = Boolean(tossUserKey);
+  const canUseContent = isLoggedIn || IS_PUBLIC_BROWSER;
 
   const handleTabChange = useCallback((tab: ActiveTab) => {
     setActiveTab(tab);
@@ -744,6 +747,12 @@ function App() {
 
 
   async function handleTossLogin() {
+    if (IS_PUBLIC_BROWSER) {
+      pendingActionRef.current = null;
+      alert({ title: '웹 체험 안내', description: '토스 로그인과 실제 포인트·광고 보상은 이 웹 체험에 연결되어 있지 않습니다.' });
+      return;
+    }
+
     logClick('login_button');
     setIsLoggingIn(true);
     setLoginError(null);
@@ -845,7 +854,7 @@ function App() {
   }
 
   const openAskHome = useCallback(() => {
-    if (!tossUserKey) {
+    if (!tossUserKey && !IS_PUBLIC_BROWSER) {
       pendingActionRef.current = { type: 'nav', tab: 'ask', step: 'landing' };
       void handleTossLogin();
       return;
@@ -861,13 +870,13 @@ function App() {
     const trimmed = query.trim();
     if (!trimmed) return;
 
-    if (!tossUserKey) {
+    if (!tossUserKey && !IS_PUBLIC_BROWSER) {
       pendingActionRef.current = { type: 'nav', tab: 'ask', step: 'landing' };
       void handleTossLogin();
       return;
     }
 
-    if (drawCount <= 0) {
+    if (drawCount <= 0 && !IS_PUBLIC_BROWSER) {
       alert({
         title: '이용권이 필요해요',
         description: '상담을 시작하려면 이용권 1장이 필요해요.',
@@ -1073,7 +1082,7 @@ function App() {
   // [New] Age Group UI Logic
   useEffect(() => {
     // [DEV] Mock user data when age group changes
-    if (import.meta.env.DEV) {
+    if (import.meta.env.DEV && !IS_PUBLIC_BROWSER) {
       const mockNames: Record<number, string> = {
         20: '김민수(20대)',
         30: '이지혜(30대)',
@@ -1170,7 +1179,7 @@ function App() {
 
   // ── 로또 머신 뽑기 API 호출 ──
   const handleQuickAsk = useCallback((question: string) => {
-    if (!tossUserKey) {
+    if (!tossUserKey && !IS_PUBLIC_BROWSER) {
       pendingActionRef.current = { type: 'quickAsk', question };
       void handleTossLogin();
       return false;
@@ -1245,14 +1254,14 @@ function App() {
     });
 
     // 비로그인/0티켓 상태에서는 가짜 결과를 만들지 않는다.
-    if (!tossUserKey && !env.DEV) {
+    if (!tossUserKey && !env.DEV && !IS_PUBLIC_BROWSER) {
       setResult(createGachaErrorResult('로그인하면 나만의 결과를 만들 수 있어요.', { needsLogin: true, retryable: false }));
       setIsSpinning(false);
       setStep('result');
       return;
     }
 
-    if (drawCount <= 0 && !env.DEV) {
+    if (drawCount <= 0 && !env.DEV && !IS_PUBLIC_BROWSER) {
       setResult(createGachaErrorResult('이용권 1장이 있어야 결과를 만들 수 있어요.', { retryable: false }));
       setIsSpinning(false);
       setStep('result');
@@ -1316,7 +1325,8 @@ function App() {
           }
           throw new Error('이용권이 부족합니다. 광고를 보거나 친구에게 공유하여 이용권을 받아보세요!');
         }
-        const errText = await response.text();
+        const errorBody = await response.json().catch(() => null);
+        const errText = errorBody?.error?.message || errorBody?.message || '조언을 만들지 못했어요. 잠시 후 다시 시도해 주세요.';
         console.error(`Gacha API fail (${response.status}):`, errText);
         // [수정] 에러 메시지가 'Family API' 관련이면 안심하라는 메시지 대신 원본 에러 노출
         throw new Error(errText || `서버 오류가 발생했습니다. (HTTP ${response.status})`);
@@ -1620,7 +1630,7 @@ function App() {
     }
 
     // 비로그인
-    if (!savedUserKey && !env.DEV) {
+    if (!savedUserKey && !env.DEV && !IS_PUBLIC_BROWSER) {
       setIsSpinning(true); setResult(null); setStep('result');
       setTimeout(() => {
         setResult(createFortuneErrorResult('운세를 보려면 로그인이 필요해요.', { needsLogin: true, retryable: false }));
@@ -1892,7 +1902,7 @@ function App() {
   }, [pendingShareRewardAmount, tossUserKey, alert, updateDrawCount]);
 
   useEffect(() => {
-    localStorage.setItem('gacha_history', JSON.stringify(resultHistory));
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(resultHistory));
   }, [resultHistory]);
 
 
@@ -2084,7 +2094,7 @@ function App() {
         if (res.ok) {
           const json = await res.json();
           if (json.data && Array.isArray(json.data)) {
-            const rawLocalHistory = localStorage.getItem('gacha_history');
+            const rawLocalHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
             const localHistory = rawLocalHistory ? JSON.parse(rawLocalHistory) : [];
             const preservedLocalLotto = Array.isArray(localHistory)
               ? localHistory.filter((item: ResultHistoryItem) => item?.type === 'lotto')
@@ -2102,7 +2112,7 @@ function App() {
             mergedHistory.sort((a, b) => (Number(b?.timestamp) || 0) - (Number(a?.timestamp) || 0));
 
             setResultHistory(mergedHistory);
-            localStorage.setItem('gacha_history', JSON.stringify(mergedHistory));
+            localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(mergedHistory));
           }
         }
       } catch (err) {
@@ -2113,6 +2123,7 @@ function App() {
     };
 
     const initSession = async () => {
+      if (IS_PUBLIC_BROWSER) return;
       const loggedIn = await isTossLoggedIn();
 
       if (loggedIn) {
@@ -2885,6 +2896,11 @@ function App() {
     <NavAccessoryContext.Provider value={navAccessoryValue}>
     <div className="flex flex-col min-h-screen bg-toss-gray-50/30 selection:bg-toss-blue/10 overflow-x-hidden">
       <main className="flex-1 px-5 pt-10 pb-36 overflow-y-auto">
+        {IS_PUBLIC_BROWSER && (
+          <p className="mb-5 t-caption text-toss-gray-600" role="note">
+            원본 가차의 웹 체험입니다. AI 답변은 새로 생성하며 실제 인물의 발언이 아닙니다. 이용권 차감·현금 보상은 없고, 입력은 Google Cloud로 전달됩니다.
+          </p>
+        )}
         <Suspense fallback={<PageLoader />}>
           <AnimatePresence mode="wait">
             {activeTab === 'home' ? (
@@ -3008,7 +3024,7 @@ function App() {
                       onRecharge={() => setIsTicketSheetOpen(true)}
                       onLogin={handleTossLogin}
                       handleRetryGacha={() => {
-                        if (drawCount <= 0) {
+                        if (drawCount <= 0 && !IS_PUBLIC_BROWSER) {
                           alert({ title: '이용권이 없어요', description: '이용권을 받아야 다시 뽑을 수 있어요.' });
                           setIsTicketSheetOpen(true);
                           return;
@@ -3039,7 +3055,7 @@ function App() {
                 )}
               </motion.div>
             ) : activeTab === 'ask' ? (
-              isLoggedIn ? (
+              canUseContent ? (
                 <AskView
                   personas={personas}
                   drawCount={drawCount}
@@ -3051,7 +3067,7 @@ function App() {
                 />
               ) : renderLoginRequired('고민 상담은 로그인 후 이용할 수 있어요', '토스 로그인하고 가차 캐릭터에게 고민을 이야기해보세요.')
             ) : activeTab === 'ask-chat' ? (
-              isLoggedIn ? (
+              canUseContent ? (
                 activeChatSession ? (
                   <ChatRoomView
                     userKey={String(tossUserKey || '')}
@@ -3087,7 +3103,7 @@ function App() {
                 onNavigateToService={handleRankingServiceNavigate}
               />
             ) : activeTab === 'history' ? (
-              isLoggedIn ? (
+              canUseContent ? (
                 <HistoryList
                   userKey={String(tossUserKey || '')}
                   resultHistory={resultHistory}
@@ -3105,7 +3121,7 @@ function App() {
                 />
               ) : renderLoginRequired('기록은 로그인 후 볼 수 있어요', '토스 로그인하면 보관함을 확인하실 수 있어요.')
             ) : activeTab === 'history-detail' ? (
-              isLoggedIn ? (
+              canUseContent ? (
                 <HistoryDetailPage
                   selectedItem={selectedHistoryDetailItem || resultHistory.find(item => item.id === selectedHistoryId) || null}
                   personas={personas}

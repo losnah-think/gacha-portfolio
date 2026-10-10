@@ -9,6 +9,7 @@ import { useVisualViewportHeight } from '../../../shared/hooks/useVisualViewport
 import { Button } from '../../../shared/components/ui';
 import { ChatBubble } from './ChatBubble';
 import { TypingIndicator } from './TypingIndicator';
+import { IS_PUBLIC_BROWSER } from '../../../public-browser/config';
 
 interface ChatRoomViewProps {
   userKey: string;
@@ -149,7 +150,9 @@ export const ChatRoomView = ({
         setMessages([aiGreeting, ...sentInitialMessages]);
       }
 
-      const response = await chatService.sendMessage(userKey, currentChatId, content);
+      const response = await chatService.sendMessage(userKey, currentChatId, content, undefined,
+        IS_PUBLIC_BROWSER ? { personaId: initialPersona.id, history: sentInitialMessages.slice(0, -1) } : undefined,
+      );
 
       if (response.tickets !== undefined) {
         setDrawCount(response.tickets);
@@ -172,7 +175,7 @@ export const ChatRoomView = ({
       console.error('Initial chat error:', error);
       setUserMessageCount((prev) => Math.max(0, prev - 1));
       setRetryMessage(content);
-      setSystemNotice('상담을 시작하지 못했어요. 이용권은 실패 응답 기준으로 보존돼요.');
+      setSystemNotice(IS_PUBLIC_BROWSER ? '상담을 시작하지 못했어요. 잠시 후 다시 보내 주세요.' : '상담을 시작하지 못했어요. 이용권은 실패 응답 기준으로 보존돼요.');
       setMessages((prev) => prev.map((message) =>
         message.role === 'user' && message.content === content
           ? { ...message, status: 'failed' as const }
@@ -210,7 +213,9 @@ export const ChatRoomView = ({
     setMessages(updatedUserMessages);
 
     try {
-      const response = await chatService.sendMessage(userKey, chatId, userMessageContent);
+      const response = await chatService.sendMessage(userKey, chatId, userMessageContent, undefined,
+        IS_PUBLIC_BROWSER ? { personaId: initialPersona.id, history: messages.filter((item) => item.status !== 'failed' && item.status !== 'sending') } : undefined,
+      );
 
       if (response.tickets !== undefined) {
         setDrawCount(response.tickets);
@@ -241,9 +246,9 @@ export const ChatRoomView = ({
     } finally {
       setIsLoading(false);
     }
-  }, [chatId, messages, saveSession, setDrawCount, userKey]);
+  }, [chatId, initialPersona.id, messages, saveSession, setDrawCount, userKey]);
 
-  const needsTicketForNextMessage = userMessageCount > 0 && userMessageCount % 3 === 0;
+  const needsTicketForNextMessage = !IS_PUBLIC_BROWSER && userMessageCount > 0 && userMessageCount % 3 === 0;
   const remainingMessages = needsTicketForNextMessage ? 0 : 3 - (userMessageCount % 3);
   const usedDots = needsTicketForNextMessage ? 3 : userMessageCount % 3;
   const isLastFreeMessage = remainingMessages === 1;
@@ -319,12 +324,12 @@ export const ChatRoomView = ({
           className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-toss-gray-100 bg-paper px-3 text-toss-gray-700 shadow-soft active:bg-toss-gray-50"
         >
           <Ticket size={16} className="text-toss-blue" />
-          <span className="t-body font-bold tabular-nums">{drawCount}</span>
+          <span className="t-body font-bold tabular-nums">{IS_PUBLIC_BROWSER ? '웹 체험' : drawCount}</span>
         </button>
       </header>
 
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5">
-        <SystemLine>이용권 1장으로 3마디까지 이야기할 수 있어요</SystemLine>
+        <SystemLine>{IS_PUBLIC_BROWSER ? '무료 웹 체험으로 이야기할 수 있어요' : '이용권 1장으로 3마디까지 이야기할 수 있어요'}</SystemLine>
 
         {messages.map((message, index) => {
           const previous = messages[index - 1];
@@ -366,7 +371,7 @@ export const ChatRoomView = ({
         <div className="mx-auto max-w-xl space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1" aria-label={`남은 대화 ${remainingMessages}`}>
+              <div className="flex items-center gap-1" aria-label={IS_PUBLIC_BROWSER ? '웹 체험 대화' : `남은 대화 ${remainingMessages}`}>
                 {[0, 1, 2].map((dot) => (
                   <span
                     key={dot}
@@ -381,7 +386,7 @@ export const ChatRoomView = ({
                 ))}
               </div>
               <span className={`t-caption font-bold ${isLastFreeMessage ? 'text-warning' : 'text-toss-gray-500'}`}>
-                남은 대화 {remainingMessages}
+                {IS_PUBLIC_BROWSER ? '무료 웹 체험' : `남은 대화 ${remainingMessages}`}
               </span>
             </div>
             {needsTicketForNextMessage && drawCount > 0 && (

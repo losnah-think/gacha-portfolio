@@ -1,3 +1,4 @@
+import { IS_PUBLIC_BROWSER } from '../../../public-browser/config';
 import { AnimatePresence } from 'framer-motion';
 import { memo, useCallback, useEffect } from 'react';
 import { CheckCircle2, ChevronLeft, Sparkles, Ticket } from 'lucide-react';
@@ -120,14 +121,14 @@ const QuoteReviewStep = memo(({
         <div className="flex items-center gap-3 rounded-[16px] border border-amber-100 bg-amber-50/70 px-4 py-3">
           <Ticket size={17} className="flex-shrink-0 text-amber-600" />
           <p className="text-[13px] font-bold leading-relaxed text-amber-700">
-            상담 시작 시 이용권 1장을 사용해요. 현재 {drawCount}장 보유 중이에요.
+            {IS_PUBLIC_BROWSER ? '웹 체험에서는 이용권 없이 시작할 수 있어요.' : <>상담 시작 시 이용권 1장을 사용해요. 현재 {drawCount}장 보유 중이에요.</>}
           </p>
         </div>
       </div>
 
       <div className="sticky bottom-4 z-10 space-y-2 rounded-[20px] border border-white/70 bg-white/90 p-3 shadow-[0_14px_32px_rgba(25,43,77,0.12)] backdrop-blur">
         <TicketCostButton
-          cost={1}
+          cost={IS_PUBLIC_BROWSER ? 0 : 1}
           balance={drawCount}
           onConfirm={() => {
             haptic('tap');
@@ -138,7 +139,7 @@ const QuoteReviewStep = memo(({
           className="h-14"
         >
           <Sparkles size={18} />
-          {isSubmitting ? '상담 준비 중...' : '이용권 1장 쓰고 시작하기'}
+          {isSubmitting ? '상담 준비 중...' : IS_PUBLIC_BROWSER ? '웹에서 무료로 시작하기' : '이용권 1장 쓰고 시작하기'}
         </TicketCostButton>
         <button
           onClick={onChangePersona}

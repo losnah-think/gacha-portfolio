@@ -4,11 +4,13 @@ Gacha is a Korean daily-content and rewards miniapp built for **Apps in Toss**. 
 
 I planned, built, and operated the product. The code here comes from that service; this repository includes a working browser portfolio demo and a sanitized source snapshot.
 
-## Use the browser app
+## Use the original Gacha interface
 
 [Open Gacha](https://gacha-portfolio-alpha.vercel.app/).
 
-The standalone browser app lets you enter a concern, choose a character, request a new AI advice card, adjust its reading size, and save/reopen/delete it in this browser's collection. It sends a same-origin request to a new server function that calls Google Cloud Vertex AI. Successful answers come from that provider; failed or unconfigured requests show an error rather than a fixed sample fallback. This browser app does not connect to Toss login, real rewards, Firebase, payments, analytics or the former production backend.
+The browser application mounts the original `App.tsx` with its home cards, character picker, result screens, chat, ranking page and bottom navigation. Original images and Pretendard typography have been restored. The app generates new fortunes, advice and chat answers through Vertex AI's `gemini-3.5-flash-lite`; results and conversations stay in this browser. It does not substitute fixed samples when generation fails.
+
+The public web integration was added on 2026-10-10. It leaves Toss identity, customer Firebase access, payments, ads and real rewards disconnected. Original controls for those features explain the platform limitation. The ranking page displays an explicit empty state without invented users or historical ranking data. AI text and fortune scores are reference content, not real-person quotations or predictions.
 
 ```sh
 cd frontend
@@ -16,9 +18,9 @@ npm ci --ignore-scripts
 npm run dev
 ```
 
-Use Node.js 24 or newer. `npm run dev` runs the frontend UI only; use Vercel development or a matching local server for `/api/advice`. Build with `npm run build`; deploy from the `frontend` project directory so Vercel includes both `api/advice.js` and `dist`. The server requires `VERTEX_PROJECT_ID`, `VERTEX_LOCATION=global`, `VERTEX_MODEL=gemini-3.5-flash-lite` and `VERTEX_SERVICE_ACCOUNT_JSON`. Keep all provider credentials on the server and keep `VITE_ENABLE_RUNTIME` unset.
+Use Node.js 24 or newer. Public browser mode is the default. `npm run dev` serves the original interface; its API proxy requires a matching local API or Vercel development to generate answers. Deploy from `frontend` so Vercel includes its server functions, original static assets and API rewrites. Server variables are `VERTEX_PROJECT_ID`, `VERTEX_LOCATION=global`, `VERTEX_MODEL=gemini-3.5-flash-lite` and `VERTEX_SERVICE_ACCOUNT_JSON`; none use the `VITE_` prefix. `VITE_PUBLIC_BROWSER=false` is only for an explicitly configured native integration with its own authorized services. See [frontend setup](frontend/README.md).
 
-The adapter in [src/portfolio](frontend/src/portfolio) reuses the original `Button`, `Card`, `HistoryContentCard`, character/situation data, result-history shape and reading-size limits. The new [Vertex server function](frontend/api/advice.js) and browser adapter were added for portfolio review on 2026-10-10, rather than representing the original production backend. The collection stores up to 10 AI results in local storage only after Save. It never silently removes earlier saved answers. Earlier fixed-sample demo data uses a separate key and is not displayed as generated advice. See the [frontend setup and limits](frontend/README.md).
+The original frontend snapshot is based on its 2026-07-07 source state. It is not presented as a reconstruction of the exact February ranking-post UI or a reopening of the terminated Toss production service.
 
 ## Contribution scope
 
@@ -48,7 +50,7 @@ flowchart LR
 - Preserves the application source and its product structure.
 - Replaces operational configuration with environment variables or local/example defaults.
 - Excludes credentials, customer records, payment and analytics exports, internal operational documents, deployment automation, scheduled jobs, and previous Git history.
-- Excludes production artwork and other assets whose redistribution was not established. Some visual assets are therefore unavailable in this copy.
+- Includes the original app static images and font needed to review this interface. Private certificates, keys and unrelated files from the original public folder remain excluded. Pretendard redistribution terms are included in [its font license](frontend/public/fonts/LICENSE.txt).
 
 The original integrated application remains a **source-review snapshot**, not a ready-to-deploy production template. Its login, server storage, AI generation, payments, rewards, and partner integrations require your own development services and authorization. The new browser app requires its own authorized Vertex configuration; original production customer data is never needed for it or for code review.
 
@@ -70,10 +72,9 @@ gitleaks git --log-opts="--all" --redact
 
 ## Browser app verification — 2026-10-10
 
-- 43 unit tests, strict TypeScript, production build, changed TypeScript lint, server syntax and Git diff checks passed.
-- Anonymous public access, real Vertex advice, reading-size adjustment, Save, reload and reopening were verified. A 390px mobile viewport also generated and saved an actual café-character answer. One generation failed and succeeded on retry; no sample fallback was shown.
-- Public API checks returned 200 for actual generation, 405 for GET, 403 for a different Origin and 400 for an invalid character. Gitleaks found no secrets in the published source or Git history.
-- Original Toss authentication, rewards, payments and customer database integrations were not restored. The full dependency tree still reports 104 npm audit findings, including 5 critical; this change did not perform a dependency-wide security upgrade.
+The original interface and the public integration are checked separately from the historical source snapshot. Current checks cover browser-mode startup, absence of Toss/Firebase identity access, original UI flows, API contracts, keyboard interaction and provider errors. Public release verification is recorded with the implementation commit and live browser evidence after deployment.
+
+The full dependency tree still reports 104 npm audit findings, including 5 critical. This interface restoration does not perform a dependency-wide security upgrade. New server functions use Node standard modules and fetch.
 
 ## Verification — 2026-09-29
 

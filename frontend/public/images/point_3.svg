@@ -1,0 +1,11 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="160" rx="34" fill="#eef6ff"/>
+  <path d="M18 34h124M18 64h124M18 94h124M18 124h124M34 18v124M64 18v124M94 18v124M124 18v124" stroke="#dbeafe" stroke-width="2" stroke-dasharray="4 8" opacity="0.75"/>
+  <rect x="19" y="19" width="122" height="122" rx="28" fill="white" stroke="#0f8bdc" stroke-width="8"/>
+  <rect x="28" y="110" width="104" height="16" rx="8" fill="#bfdbfe" opacity="0.62"/>
+  <circle cx="80" cy="72" r="43" fill="#62b0ff" stroke="#0f8bdc" stroke-width="8"/>
+  <circle cx="66" cy="58" r="8" fill="white" opacity="0.62"/>
+  <path d="M112 39l5 12 12 5-12 5-5 12-5-12-12-5 12-5 5-12Z" fill="#fff7c2" stroke="#0f8bdc" stroke-width="4" stroke-linejoin="round"/>
+  <text x="80" y="87" text-anchor="middle" font-size="42" font-family="Arial, Apple SD Gothic Neo, sans-serif" font-weight="900" fill="white">3</text>
+  <text x="80" y="127" text-anchor="middle" font-size="21" font-family="Arial, Apple SD Gothic Neo, sans-serif" font-weight="900" fill="#0f8bdc">점</text>
+</svg>

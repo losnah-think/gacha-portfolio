@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Button } from './Button';
 import { cn } from '../../utils/cn';
+import { IS_PUBLIC_BROWSER } from '../../../public-browser/config';
 
 interface TicketCostButtonProps {
   cost: number;
@@ -43,7 +44,7 @@ export const TicketCostButton = ({
           hasEnoughBalance ? 'border-white/40 bg-white/20 text-white' : 'border-ink-soft bg-paper text-toss-gray-700',
         )}
       >
-        이용권 {cost}장
+        {IS_PUBLIC_BROWSER && cost === 0 ? '무료 웹 체험' : <>이용권 {cost}장</>}
       </span>
     </Button>
   );

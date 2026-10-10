@@ -50,6 +50,13 @@
   --shadow-soft: 0 2px 12px rgba(25, 31, 40, 0.08);
 }
 
+@font-face {
+  font-family: 'Pretendard';
+  src: url('/fonts/PretendardVariable.subset.woff2') format('woff2-variations');
+  font-weight: 45 920;
+  font-display: swap;
+}
+
 @keyframes float {
   0%,
   100% {
@@ -100,7 +107,7 @@
 }
 
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-toss-gray-100);

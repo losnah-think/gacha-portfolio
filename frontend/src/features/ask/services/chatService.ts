@@ -1,5 +1,11 @@
 import type { ChatMessage, PersonaGroup, Persona } from '../../../shared/types';
 import { apiUrl } from '../../../shared/api/client';
+import { IS_PUBLIC_BROWSER } from '../../../public-browser/config';
+
+interface PublicChatContext {
+    personaId: string;
+    history: Pick<ChatMessage, 'role' | 'content'>[];
+}
 
 const createRequestId = (prefix: string) =>
     `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2)}`;
@@ -49,7 +55,7 @@ export const chatService = {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userKey, personaId, requestId }),
+                body: JSON.stringify({ ...(!IS_PUBLIC_BROWSER ? { userKey } : {}), personaId, requestId }),
             });
 
             if (!response.ok) {
@@ -75,14 +81,20 @@ export const chatService = {
     },
 
     // Send a message to an existing chat
-    async sendMessage(userKey: string, chatId: string, message: string, requestId = createRequestId('chat_message')): Promise<{ message: string; tickets?: number; requestId?: string; retryable?: boolean }> {
+    async sendMessage(userKey: string, chatId: string, message: string, requestId = createRequestId('chat_message'), context?: PublicChatContext): Promise<{ message: string; tickets?: number; requestId?: string; retryable?: boolean }> {
         try {
+            const priorMessages = context?.history || [];
+            const firstUser = priorMessages.findIndex((item) => item.role === 'user');
+            const history = firstUser < 0 ? [] : priorMessages.slice(firstUser).slice(-8).map(({ role, content }) => ({ role, content }));
             const response = await fetch(apiUrl('/chat/message', { version: 'v3' }), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userKey, chatId, message, requestId }),
+                body: JSON.stringify({
+                    ...(!IS_PUBLIC_BROWSER ? { userKey } : { personaId: context?.personaId, history }),
+                    chatId, message, requestId,
+                }),
             });
 
             if (!response.ok) {
@@ -109,6 +121,14 @@ export const chatService = {
 
     // Get chat history
     async getChatHistory(userKey: string, chatId: string): Promise<{ messages: ChatMessage[] }> {
+        if (IS_PUBLIC_BROWSER) {
+            try {
+                const saved: unknown = JSON.parse(localStorage.getItem('gacha_chat_sessions') || '[]');
+                if (!Array.isArray(saved)) return { messages: [] };
+                const session = saved.find((item) => item?.id === chatId);
+                return { messages: Array.isArray(session?.messages) ? session.messages : [] };
+            } catch { return { messages: [] }; }
+        }
         try {
             const response = await fetch(apiUrl(`/chat/${chatId}`, { version: 'v3', query: { userKey } }));
 

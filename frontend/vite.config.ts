@@ -1,9 +1,19 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import { loadEnv } from 'vite'
+import { fileURLToPath } from 'node:url'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const publicBrowser = loadEnv(mode, process.cwd(), '').VITE_PUBLIC_BROWSER !== 'false';
+  return {
   plugins: [react()],
+  resolve: {
+    alias: publicBrowser ? [{
+      find: '@apps-in-toss/web-framework',
+      replacement: fileURLToPath(new URL('./src/public-browser/tossSdk.ts', import.meta.url)),
+    }] : [],
+  },
   cacheDir: '.cache/vite',
   test: {
     globals: true,
@@ -15,7 +25,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8787',
-        changeOrigin: true,
+        changeOrigin: !publicBrowser,
         secure: false,
       },
       '/toss': {
@@ -61,4 +71,5 @@ export default defineConfig({
     // 청크 크기 경고 임계값 상향 (이미 분리했으므로)
     chunkSizeWarningLimit: 600,
   },
+  };
 })

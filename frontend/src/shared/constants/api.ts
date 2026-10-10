@@ -1,3 +1,5 @@
+import { IS_PUBLIC_BROWSER } from '../../public-browser/config';
+
 export const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || 'http://127.0.0.1:8787';
 export const API_V2 = '/api/v2';
 export const API_V3 = '/api/v3';
@@ -13,6 +15,7 @@ export const isNative = () => {
 
 // [수정] getBaseUrl이 항상 유효한 URL을 반환하도록 개선
 export const getBaseUrl = () => {
+    if (IS_PUBLIC_BROWSER) return '';
     // 1. 환경 변수가 정의되어 있으면 최우선 사용
     if (BACKEND_API_URL && !BACKEND_API_URL.includes('localhost')) {
         return BACKEND_API_URL;
