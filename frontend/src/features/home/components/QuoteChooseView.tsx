@@ -71,7 +71,7 @@ const QuoteReviewStep = memo(({
           이대로 상담을 시작할까요?
         </h3>
         <p className="text-[14px] font-medium leading-relaxed text-toss-gray-400">
-          시작 버튼을 누르기 전까지 이용권은 사용되지 않아요.
+          {IS_PUBLIC_BROWSER ? '이용권 없이 무료로 상담할 수 있어요.' : '시작 버튼을 누르기 전까지 이용권은 사용되지 않아요.'}
         </p>
       </div>
 

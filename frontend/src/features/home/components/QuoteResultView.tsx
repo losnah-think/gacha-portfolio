@@ -14,6 +14,7 @@ import { getStorageUrl } from '../../../shared/utils/storage';
 import { REVEAL } from '../../../shared/motion';
 import { DrawStage } from './gacha/DrawStage';
 import { RevealFX } from './gacha/RevealFX';
+import { IS_PUBLIC_BROWSER } from '../../../public-browser/config';
 
 interface QuoteResultViewProps {
   isSpinning: boolean;
@@ -557,7 +558,7 @@ export const QuoteResultView = memo(({
                 </motion.button>
               ) : null}
 
-              <motion.button
+              {!IS_PUBLIC_BROWSER && <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={() =>
                   handleShareReward(
@@ -572,15 +573,15 @@ export const QuoteResultView = memo(({
                 <Share2 size={18} />
                 <span>공유하고 이용권 받기</span>
                 <span className="t-micro rounded-sm border border-white/40 bg-white/20 px-2 py-0.5">+1장</span>
-              </motion.button>
+              </motion.button>}
 
               <button
                 type="button"
                 onClick={handleRetryGacha}
                 className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-ink bg-cream px-4 py-4 text-[16px] font-bold text-toss-gray-900 shadow-hard-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
               >
-                <Ticket size={18} />
-                다시 뽑기 · 이용권 1장
+                {IS_PUBLIC_BROWSER ? <RefreshCw size={18} /> : <Ticket size={18} />}
+                {IS_PUBLIC_BROWSER ? '무료로 다시 뽑기' : '다시 뽑기 · 이용권 1장'}
               </button>
 
               <div className="flex gap-2">

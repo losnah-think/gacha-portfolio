@@ -638,6 +638,7 @@ function App() {
   ]);
 
   const updateDrawCount = useCallback((newCountOrFn: number | ((prev: number) => number)) => {
+    if (IS_PUBLIC_BROWSER) return;
     setDrawCount((prev: number) => {
       const next = typeof newCountOrFn === 'function' ? newCountOrFn(prev) : newCountOrFn;
       // 로컬 스토리지 업데이트 (백업용)
@@ -1298,7 +1299,7 @@ function App() {
           diamondBoostPct: probabilityBoost.diamondBoostPct,
           platinumBoostPct: probabilityBoost.platinumBoostPct,
         },
-        ticketCost: ticketCost, // [추가] 티켓 차감량 정보 전달
+        ticketCost: IS_PUBLIC_BROWSER ? 0 : ticketCost,
         contentType: 'quote', // 홈 가차는 조언(quote) 전용이에요
       };
 
@@ -1318,7 +1319,7 @@ function App() {
       const response = await fetchPromise;
 
       if (!response.ok) {
-        if (response.status === 403) {
+        if (response.status === 403 && !IS_PUBLIC_BROWSER) {
           // [추가] 403 발생 시 서버와 티켓 수 동기화 시도
           if (userKey) {
             void fetchUserTickets(userKey);
@@ -1654,7 +1655,7 @@ function App() {
           userKey: String(userKey),
           zodiacSign: sign,
           category: option.id,
-          ticketCost: option.tickets,
+          ticketCost: IS_PUBLIC_BROWSER ? 0 : option.tickets,
           forceRegenerate,
           requestId: crypto.randomUUID?.() || `fortune_${forceRegenerate ? 'regen_' : ''}${Date.now()}_${Math.random().toString(36).slice(2)}`,
         }),
@@ -2992,8 +2993,8 @@ function App() {
                       onRetry={() => {
                         confirm({
                           title: '운세를 재생성할까요?',
-                          description: '새로운 운세를 만들면 이용권 1장을 더 사용해요.',
-                          confirmText: '1장 쓰고 재생성',
+                          description: IS_PUBLIC_BROWSER ? '이용권 없이 새로운 운세를 만들어요.' : '새로운 운세를 만들면 이용권 1장을 더 사용해요.',
+                          confirmText: IS_PUBLIC_BROWSER ? '무료로 다시 뽑기' : '1장 쓰고 재생성',
                           cancelText: '취소',
                           onConfirm: () => {
                             logGachaRetry(result?.rarity);
@@ -3031,8 +3032,8 @@ function App() {
                         }
                         confirm({
                           title: '다시 뽑기',
-                          description: '이용권 1장을 사용해서 다시 뽑을까요?',
-                          confirmText: '뽑기',
+                          description: IS_PUBLIC_BROWSER ? '이용권 없이 새로운 조언을 만들어요.' : '이용권 1장을 사용해서 다시 뽑을까요?',
+                          confirmText: IS_PUBLIC_BROWSER ? '무료로 다시 뽑기' : '뽑기',
                           cancelText: '취소',
                           onConfirm: () => {
                             // [Analytics] 재시도 로깅
@@ -3043,7 +3044,7 @@ function App() {
                           },
                         });
                       }}
-                      onDetailedAnalysis={handleDetailedAnalysis}
+                      onDetailedAnalysis={IS_PUBLIC_BROWSER ? undefined : handleDetailedAnalysis}
                       onViewAnalysis={result?.detailedAnalysis ? () => {
                         setAnalysisPageData({ analysis: result.detailedAnalysis!, title: result.title, persona: result.persona, from: 'home' });
                         setActiveTab('detailed-analysis');
@@ -3130,7 +3131,7 @@ function App() {
                   handleDeleteHistoryItem={handleDeleteHistoryItem}
                   logClick={logClick}
                   ageGroup={ageGroup}
-                  onDetailedAnalysis={handleHistoryDetailedAnalysis}
+                  onDetailedAnalysis={IS_PUBLIC_BROWSER ? undefined : handleHistoryDetailedAnalysis}
                   onViewAnalysis={(() => {
                     const item = selectedHistoryDetailItem || resultHistory.find(i => i.id === selectedHistoryId);
                     return item?.detailedAnalysis ? () => {

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { PERSONAS } from '../../shared/constants/personas';
 import { DEFAULT_SITUATIONS } from '../../shared/constants/situations';
 
@@ -8,6 +8,7 @@ const fortune = {
   score: 80, ratings: { total: 80, love: 80, wealth: 80, business: 80, health: 80, exam: 80 },
   luckyItems: { color: '하늘색', number: '8', direction: '동쪽', food: '따뜻한 차' }, category: 'total',
 };
+const quote = { type: 'quote', title: '오늘 시작할 작은 행동', content: '지금 할 수 있는 일을 하나 골라 가볍게 시도해 보세요.', rarity: 'normal', score: 75, source: 'vertex' };
 const success = (data: unknown) => new Response(JSON.stringify({ resultType: 'SUCCESS', data }), { status: 200 });
 
 beforeEach(() => {
@@ -24,9 +25,10 @@ beforeEach(() => {
     if (path === '/api/v2/discover/situations') return success(DEFAULT_SITUATIONS);
     if (path === '/api/v2/promotion/list' || path === '/api/v3/chat/suggested-questions') return success([]);
     if (path === '/api/v2/fortune/zodiac') return success(fortune);
+    if (path === '/api/v2/gacha') return success(quote);
     if (path === '/api/v3/chat/start') return success({ chatId: 'portfolio-app-integration', message: '' });
     if (path === '/api/v3/chat/message') return success({ message: '오늘 직접 확인할 작은 질문 하나를 골라 보세요.' });
-    if (path === '/api/v2/log/event' || path === '/api/log') return success({ stored: false });
+    if (path === '/api/v2/log/event' || path === '/api/log' || path === '/api/v2/interactions/cta') return success({ stored: false });
     throw new Error(`Unexpected API in original App test: ${path}`);
   }));
 });
@@ -43,6 +45,16 @@ function assertNoPrivateCalls() {
   expect(urls.every((url) => url.startsWith('/api/'))).toBe(true);
   expect(urls.some((url) => /\/(toss|user|reward|storage|bootstrap)(?:\/|\?|$)/.test(url))).toBe(false);
   expect(vi.mocked(fetch).mock.calls.some(([, init]) => String(init?.body).includes('NATIVE_TOKEN_MARKER'))).toBe(false);
+}
+
+function requestBodies(path: string) {
+  return vi.mocked(fetch).mock.calls.filter(([url]) => String(url) === path).map(([, init]) => JSON.parse(String(init?.body)));
+}
+
+function assertFreeResultActions() {
+  expect(screen.queryByRole('button', { name: /공유하고 이용권 받기/ })).toBeNull();
+  expect(screen.queryByRole('button', { name: /광고 보고 상세 해석 보기/ })).toBeNull();
+  expect(screen.queryByRole('button', { name: /다시 뽑기 · 이용권/ })).toBeNull();
 }
 
 describe('original App public browser integration', () => {
@@ -88,6 +100,53 @@ describe('original App public browser integration', () => {
     expect(body.personaId).toBe('socrates'); expect(body.userKey).toBeUndefined();
     expect(body.history).toEqual([]);
     await waitFor(() => expect(JSON.parse(localStorage.getItem('gacha_chat_sessions') || '[]')).toHaveLength(1));
+    assertNoPrivateCalls();
+  });
+
+  it('generates and retries an original fortune without charging or changing saved native tickets', async () => {
+    localStorage.setItem('drawCount', '7');
+    await mountOriginalApp();
+    fireEvent.click(screen.getByRole('button', { name: /오늘 운세 보기/ }));
+    await screen.findByText(fortune.summary, {}, { timeout: 5000 });
+    expect(requestBodies('/api/v2/fortune/zodiac')).toHaveLength(1);
+    expect(requestBodies('/api/v2/fortune/zodiac')[0].ticketCost).toBe(0);
+    expect(localStorage.getItem('drawCount')).toBe('7');
+    assertFreeResultActions();
+
+    fireEvent.click(screen.getByRole('button', { name: '무료로 다시 뽑기' }));
+    const dialog = await screen.findByRole('dialog', { name: '운세를 재생성할까요?' });
+    expect(within(dialog).getByText('이용권 없이 새로운 운세를 만들어요.')).toBeTruthy();
+    fireEvent.click(within(dialog).getByRole('button', { name: '무료로 다시 뽑기' }));
+    await waitFor(() => expect(JSON.parse(localStorage.getItem('gacha_public_original_history_v1') || '[]')).toHaveLength(2));
+    expect(requestBodies('/api/v2/fortune/zodiac').map((body) => body.ticketCost)).toEqual([0, 0]);
+    expect(requestBodies('/api/v2/fortune/zodiac')[1].forceRegenerate).toBe(true);
+    expect(localStorage.getItem('drawCount')).toBe('7');
+    assertFreeResultActions();
+    assertNoPrivateCalls();
+  });
+
+  it('generates and retries chosen-character advice without native tickets, ads or recharge prompts', async () => {
+    localStorage.setItem('drawCount', '9');
+    await mountOriginalApp();
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: '새로운 일을 시작하기가 망설여져요' } });
+    fireEvent.click(screen.getByRole('button', { name: '고민 보내기' }));
+    fireEvent.click(await screen.findByRole('button', { name: /단골 카페 사장님/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /웹에서 무료로 시작하기/ }));
+    await screen.findByText(quote.content, {}, { timeout: 5000 });
+    expect(requestBodies('/api/v2/gacha')).toHaveLength(1);
+    expect(requestBodies('/api/v2/gacha')[0]).toMatchObject({ personaId: 'healing_단골_카페_사장님', ticketCost: 0 });
+    expect(localStorage.getItem('drawCount')).toBe('9');
+    assertFreeResultActions();
+
+    fireEvent.click(screen.getByRole('button', { name: '무료로 다시 뽑기' }));
+    const dialog = await screen.findByRole('dialog', { name: '다시 뽑기' });
+    expect(within(dialog).getByText('이용권 없이 새로운 조언을 만들어요.')).toBeTruthy();
+    fireEvent.click(within(dialog).getByRole('button', { name: '무료로 다시 뽑기' }));
+    await waitFor(() => expect(JSON.parse(localStorage.getItem('gacha_public_original_history_v1') || '[]')).toHaveLength(2));
+    expect(requestBodies('/api/v2/gacha').map((body) => body.ticketCost)).toEqual([0, 0]);
+    expect(requestBodies('/api/v2/gacha')[1].personaId).toBe('healing_단골_카페_사장님');
+    expect(localStorage.getItem('drawCount')).toBe('9');
+    assertFreeResultActions();
     assertNoPrivateCalls();
   });
 });

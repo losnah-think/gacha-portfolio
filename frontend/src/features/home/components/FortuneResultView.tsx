@@ -10,6 +10,7 @@ import { recommendedReadingFontSize } from '../../../shared/utils/readingFontSiz
 import { REVEAL } from '../../../shared/motion';
 import { DrawStage } from './gacha/DrawStage';
 import { RevealFX } from './gacha/RevealFX';
+import { IS_PUBLIC_BROWSER } from '../../../public-browser/config';
 
 interface FortuneResultViewProps {
   isSpinning: boolean;
@@ -357,7 +358,7 @@ export const FortuneResultView = memo(({
           <p className="t-caption font-bold text-toss-gray-500">✓ 보관함에 저장했어요</p>
         </div>
 
-        <motion.button
+        {!IS_PUBLIC_BROWSER && <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => {
             const title = shareInfo?.title || `[오늘의 운세] ${selectionSummary} 결과`;
@@ -369,7 +370,7 @@ export const FortuneResultView = memo(({
           <Share2 size={18} />
           공유하고 이용권 받기
           <span className="t-micro rounded-sm border border-white/40 bg-white/20 px-2 py-0.5">+1장</span>
-        </motion.button>
+        </motion.button>}
 
         <button
           type="button"
@@ -377,7 +378,7 @@ export const FortuneResultView = memo(({
           className="flex h-14 w-full items-center justify-center gap-2 rounded-md border-2 border-ink bg-cream text-[16px] font-bold text-toss-gray-900 shadow-hard-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
         >
           <RotateCcw size={18} />
-          다시 뽑기 · 이용권 1장
+          {IS_PUBLIC_BROWSER ? '무료로 다시 뽑기' : '다시 뽑기 · 이용권 1장'}
         </button>
 
         <div className="flex gap-2.5">
